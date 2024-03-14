@@ -1,22 +1,48 @@
 import flask
+from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, render_template, redirect, request, make_response
 from data import db_session
 from forms.user import RegisterForm, LoginForm
 from data.users import User
+from data.topic import Topic
+from data.comment import Comment
 from sqlalchemy import orm
 from flask_login import LoginManager, login_user
+from data.db_session import SqlAlchemyBase
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
+db = SQLAlchemy()
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html')
+    db_sess = db_session.create_session()
+    if request.method == 'POST':
+        topic = Topic(
+            title=request.form['title'],
+            description=request.form['description']
+        )
+        db_sess.add(topic)
+        db_sess.commit()
+    topics = db_sess.execute(db.select(Topic)).scalars()
+    return render_template('index.html', topics=topics)
 
+
+# @app.route('/topic/<int:id>', methods=['GET', 'POST'])
+# def topic(id):
+#     if request.method == 'POST':
+#         db_sess = db_session.create_session()
+#         comment = Comment(
+#             text=request.form['text'],
+#             topicId=request.form['topicId']
+#         )
+#         db_sess.add(comment)
+#         db_sess.commit()
+#     return render_template('user/details')
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -83,7 +109,7 @@ def login():
 
 def main():
     db_session.global_init('db/blogs.sqlite')
-    app.run(debug=True, port=5001)
+    app.run(debug=True, port=5002)
 
 
 if __name__ == '__main__':
