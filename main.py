@@ -12,7 +12,9 @@ from data.db_session import SqlAlchemyBase
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/blogs.sqltie'
 db = SQLAlchemy()
+db.init_app(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -32,17 +34,21 @@ def index():
     return render_template('index.html', topics=topics)
 
 
-# @app.route('/topic/<int:id>', methods=['GET', 'POST'])
-# def topic(id):
-#     if request.method == 'POST':
-#         db_sess = db_session.create_session()
-#         comment = Comment(
-#             text=request.form['text'],
-#             topicId=request.form['topicId']
-#         )
-#         db_sess.add(comment)
-#         db_sess.commit()
-#     return render_template('user/details')
+@app.route('/topic/<int:id>', methods=['GET', 'POST'])
+def topic(id):
+    db_sess = db_session.create_session()
+
+    if request.method == 'POST':
+        comment = Comment(
+            text=request.form['comment'],
+            topicId=id
+        )
+        db_sess.add(comment)
+        db_sess.commit()
+
+    topic = db.get_or_404(Topic, id)
+    comments = Comment.query.filter_by(topicId=id).all()
+    return render_template('topic.html', topic=topic, comments=comments)
 
 
 @app.route('/register', methods=['GET', 'POST'])
