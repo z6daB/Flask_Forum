@@ -9,12 +9,16 @@ from data.comment import Comment
 from sqlalchemy import orm
 from flask_login import LoginManager, login_user
 from data.db_session import SqlAlchemyBase
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/blogs.sqltie'
-db = SQLAlchemy()
-db.init_app(app)
+# file_path = os.path.abspath(os.getcwd()) + "blogs.db"
+# db = SQLAlchemy()
+#
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + file_path
+#
+# db.init_app(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -30,14 +34,13 @@ def index():
         )
         db_sess.add(topic)
         db_sess.commit()
-    topics = db_sess.execute(db.select(Topic)).scalars()
+    topics = db_sess.query(Topic).all()
     return render_template('index.html', topics=topics)
 
 
 @app.route('/topic/<int:id>', methods=['GET', 'POST'])
 def topic(id):
     db_sess = db_session.create_session()
-
     if request.method == 'POST':
         comment = Comment(
             text=request.form['comment'],
@@ -45,9 +48,8 @@ def topic(id):
         )
         db_sess.add(comment)
         db_sess.commit()
-
-    topic = db.get_or_404(Topic, id)
-    comments = Comment.query.filter_by(topicId=id).all()
+    topic = db_sess.query(Topic).filter(Topic.id == id).scalar()
+    comments = db_sess.query(Comment).filter(Comment.topicId == id).all()
     return render_template('topic.html', topic=topic, comments=comments)
 
 
