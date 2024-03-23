@@ -35,7 +35,11 @@ def index():
         db_sess.add(topic)
         db_sess.commit()
     topics = db_sess.query(Topic).all()
-    return render_template('index.html', topics=topics)
+    try:
+        user = db_sess.query(User).first()
+    except Exception:
+        user = ''
+    return render_template('index.html', topics=topics, user=user)
 
 
 @app.route('/topic/<int:id>', methods=['GET', 'POST'])
@@ -113,6 +117,16 @@ def login():
                                message="Неправильный логин или пароль",
                                form=form)
     return render_template('login.html', title='Авторизация', form=form)
+
+
+@app.route('/test')
+def test():
+    return render_template('test.html')
+
+
+@app.route('/error')
+def error():
+    return render_template('404.html')
 
 
 def main():
