@@ -49,7 +49,7 @@ def topic(id):
         db_sess.commit()
     topic = db_sess.query(Topic).filter(Topic.id == id).scalar()
     comments = db_sess.query(Comment).filter(Comment.topicId == id).all()
-    return render_template('topic.html', topic=topic, comments=comments)
+    return render_template('topic.html', topic=topic, comments=comments, user=current_user)
 
 
 @app.route('/register', methods=['GET', 'POST'])
