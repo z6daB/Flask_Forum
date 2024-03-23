@@ -7,18 +7,13 @@ from data.users import User
 from data.topic import Topic
 from data.comment import Comment
 from sqlalchemy import orm
-from flask_login import LoginManager, login_user
+from flask_login import LoginManager, login_user, current_user, logout_user
 from data.db_session import SqlAlchemyBase
 import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
-# file_path = os.path.abspath(os.getcwd()) + "blogs.db"
-# db = SQLAlchemy()
-#
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + file_path
-#
-# db.init_app(app)
+
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -35,9 +30,9 @@ def index():
         db_sess.add(topic)
         db_sess.commit()
     topics = db_sess.query(Topic).all()
-    try:
-        user = db_sess.query(User).first()
-    except Exception:
+    if current_user.is_authenticated:
+        user = current_user
+    else:
         user = ''
     return render_template('index.html', topics=topics, user=user)
 
@@ -106,6 +101,8 @@ def load_user(user_id):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return render_template('profile.html')
     form = LoginForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
@@ -128,6 +125,15 @@ def test():
 def error():
     return render_template('404.html')
 
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect("/")
+
+@app.route('/profile')
+def profile():
+    return render_template('profile.html')
 
 def main():
     db_session.global_init('db/blogs.sqlite')
