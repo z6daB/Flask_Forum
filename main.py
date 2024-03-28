@@ -1,6 +1,6 @@
 import flask
 from flask_sqlalchemy import SQLAlchemy
-from flask import Flask, render_template, redirect, request, make_response
+from flask import Flask, render_template, redirect, request, make_response, jsonify
 from data import db_session
 from forms.user import RegisterForm, LoginForm
 from data.users import User
@@ -13,7 +13,6 @@ import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
-
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -121,9 +120,9 @@ def test():
     return render_template('test.html')
 
 
-@app.route('/error')
-def error():
-    return render_template('404.html')
+# @app.route('/error')
+# def error():
+#     return render_template('404.html')
 
 
 @app.route('/logout')
@@ -131,9 +130,19 @@ def logout():
     logout_user()
     return redirect("/")
 
+
 @app.route('/profile')
 def profile():
-    return render_template('profile.html')
+    if current_user.is_authenticated:
+        return render_template('profile.html', user=current_user)
+
+    # else:
+    #     return redirect('/error')
+
+@app.errorhandler(404)
+def error404(error):
+    return render_template('404.html')
+
 
 def main():
     db_session.global_init('db/blogs.sqlite')

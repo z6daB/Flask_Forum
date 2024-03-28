@@ -15,23 +15,24 @@
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">About</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link disabled" aria-disabled="true">Disabled</a>
-                    </li>
-                    <li>
-                        <a class="nav-link" href="/profile">{{user.name}}</a>
-                    </li>
-                </ul>
+
+
+                <div class="dropdown">
+                    <a class="btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="{{ url_for('static', filename='images/user.png') }}" alt="user" width="32px" height="32px"></a>
+                    <ul class="dropdown-menu" style="">
+                        {% if current_user.is_authenticated %}
+                        <li><a class="dropdown-item" href="/profile">Профиль</a></li>
+                        <li><a class="dropdown-item" href="/logout">Выйти из аккаунт</a></li>
+
+                        {% else %}
+                        <li><a class="dropdown-item" href="/login">Войти</a></li>
+                        <li><a class="dropdown-item" href="/register">Зарегистрироваться</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
             </div>
-        </div>
     </nav>
     <div class="container">
         <h1 class="fs-3 text my-4">Add a topic</h1>
